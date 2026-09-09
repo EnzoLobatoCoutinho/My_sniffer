@@ -1,0 +1,12 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "../../../../../tmp/my_sniffer_conan/build/CMakePresets.json",
+        "../../../../../tmp/my_sniffer_gtest/build/CMakePresets.json",
+        "../../../../../tmp/my_sniffer_werror/CMakePresets.json",
+        "build/CMakePresets.json"
+    ]
+}
