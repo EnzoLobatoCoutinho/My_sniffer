@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(my_sniffer VERSION 0.1.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(WIN32)
+    message(STATUS "Configuration cible : Windows")
+elseif(UNIX)
+    message(STATUS "Configuration cible : Linux/Unix")
+else()
+    message(FATAL_ERROR "Systeme d'exploitation non supporte")
+endif()
+
+add_executable(my_sniffer
+    src/main.cpp
+)
+
+target_include_directories(my_sniffer
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+elseif(MSVC)
+    add_compile_options(/W4 /WX)
+endif()
+
+if(WIN32)
+    target_compile_definitions(my_sniffer PRIVATE MY_SNIFFER_WINDOWS=1)
+elseif(UNIX)
+    target_compile_definitions(my_sniffer PRIVATE MY_SNIFFER_LINUX=1)
+endif()
+
+include(CTest)
+
+if(BUILD_TESTING)
+    find_package(GTest CONFIG REQUIRED)
+
+    add_executable(my_sniffer_tests
+        tests/main.cpp
+    )
+
+    target_link_libraries(my_sniffer_tests PRIVATE GTest::gtest_main)
+
+    include(GoogleTest)
+    gtest_discover_tests(my_sniffer_tests)
+endif()
