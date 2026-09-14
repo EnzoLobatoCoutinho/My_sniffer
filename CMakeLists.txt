@@ -19,6 +19,7 @@ endif()
 
 add_executable(my_sniffer
     src/main.cpp
+    src/core/packet.cpp
 )
 
 target_include_directories(my_sniffer
@@ -49,6 +50,13 @@ if(BUILD_TESTING)
 
     add_executable(my_sniffer_tests
         tests/main.cpp
+        tests/core/packet_test.cpp
+        src/core/packet.cpp
+    )
+
+    target_include_directories(my_sniffer_tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
 
     target_link_libraries(my_sniffer_tests PRIVATE GTest::gtest_main)
