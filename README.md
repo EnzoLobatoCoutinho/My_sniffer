@@ -9,6 +9,10 @@ Base de projet C++ construite avec CMake et Conan.
 - Un compilateur C++17
 - GoogleTest 1.14.0 (installe automatiquement par Conan)
 
+Sur Windows, installe aussi Npcap avec son **Npcap SDK**. Le SDK est
+necessaire pour compiler, et le runtime Npcap doit etre installe sur la machine
+qui execute le programme.
+
 ## Compiler
 
 ```bash
@@ -28,6 +32,16 @@ le compilateur detecte. Sur Linux, CMake utilise GCC ou Clang.
 conan profile detect --force
 conan install . --output-folder=build --build=missing
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$PWD/build/conan_toolchain.cmake"
+cmake --build build --config Release
+```
+
+Si le SDK Npcap n'est pas dans un emplacement standard, indique sa racine :
+
+```powershell
+$env:NPCAP_SDK_DIR = "C:\Npcap-SDK"
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release `
+	-DCMAKE_TOOLCHAIN_FILE="$PWD/build/conan_toolchain.cmake" `
+	-DNPCAP_SDK_DIR="$env:NPCAP_SDK_DIR"
 cmake --build build --config Release
 ```
 
