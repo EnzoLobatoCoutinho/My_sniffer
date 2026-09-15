@@ -12,9 +12,6 @@
 
 namespace sniffer {
 
-// Mutable counterpart of Packet: the parsing chain (Ethernet -> IPv4 ->
-// TCP/UDP) fills one of these layer by layer, each handler setting only
-// the layer it decoded, then calls build() once at the end of the chain.
 class PacketBuilder {
     public:
         PacketBuilder& setTimestamp(std::chrono::system_clock::time_point timestamp);
