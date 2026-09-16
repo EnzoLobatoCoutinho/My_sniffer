@@ -61,3 +61,17 @@ TEST(PacketBuilderTest, SettingLayerAgainOverwritesPrevious) {
     ASSERT_TRUE(pkt.ipv4().has_value());
     EXPECT_EQ(pkt.ipv4()->ttl, 64);
 }
+
+TEST(PacketBuilderTest, GettersExposeStateBeforeBuild) {
+    Ipv4Header ip{};
+    ip.protocol = 6;
+
+    PacketBuilder builder;
+    builder.setIpv4(ip);
+
+    ASSERT_TRUE(builder.ipv4().has_value());
+    EXPECT_EQ(builder.ipv4()->protocol, 6);
+    EXPECT_FALSE(builder.ethernet().has_value());
+    EXPECT_FALSE(builder.transport().has_value());
+    EXPECT_TRUE(builder.payload().empty());
+}
