@@ -25,6 +25,8 @@ add_executable(my_sniffer
     src/parser/bytes_utils.cpp
     src/parser/ethernet_handler.cpp
     src/parser/ipv4_handler.cpp
+    src/parser/tcp_handler.cpp
+    src/parser/udp_handler.cpp
 )
 
 target_include_directories(my_sniffer
@@ -61,12 +63,16 @@ if(BUILD_TESTING)
         tests/parser/bytes_utils_test.cpp
         tests/parser/ethernet_handler_test.cpp
         tests/parser/ipv4_handler_test.cpp
+        tests/parser/tcp_handler_test.cpp
+        tests/parser/udp_handler_test.cpp
         src/core/packet.cpp
         src/core/packet_builder.cpp
         src/core/event_bus.cpp
         src/parser/bytes_utils.cpp
         src/parser/ethernet_handler.cpp
         src/parser/ipv4_handler.cpp
+        src/parser/tcp_handler.cpp
+        src/parser/udp_handler.cpp
     )
 
     target_include_directories(my_sniffer_tests
