@@ -11,8 +11,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(WIN32)
     message(STATUS "Configuration cible : Windows")
     find_package(Npcap REQUIRED)
+    set(PLATFORM_CAPTURE_SOURCES src/capture/capture_windows.cpp)
+    set(PLATFORM_CAPTURE_TEST_SOURCES "")
 elseif(UNIX)
     message(STATUS "Configuration cible : Linux/Unix")
+    set(PLATFORM_CAPTURE_SOURCES src/capture/capture_linux.cpp)
+    set(PLATFORM_CAPTURE_TEST_SOURCES tests/capture/capture_linux_test.cpp src/capture/capture_linux.cpp)
 else()
     message(FATAL_ERROR "Systeme d'exploitation non supporte")
 endif()
@@ -27,6 +31,7 @@ add_executable(my_sniffer
     src/parser/ipv4_handler.cpp
     src/parser/tcp_handler.cpp
     src/parser/udp_handler.cpp
+    ${PLATFORM_CAPTURE_SOURCES}
 )
 
 target_include_directories(my_sniffer
@@ -73,6 +78,7 @@ if(BUILD_TESTING)
         src/parser/ipv4_handler.cpp
         src/parser/tcp_handler.cpp
         src/parser/udp_handler.cpp
+        ${PLATFORM_CAPTURE_TEST_SOURCES}
     )
 
     target_include_directories(my_sniffer_tests
