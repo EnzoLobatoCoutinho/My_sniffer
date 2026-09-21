@@ -15,9 +15,6 @@
 
 namespace sniffer {
 
-// Captures raw Ethernet frames on Linux through an AF_PACKET/SOCK_RAW
-// socket bound to a single interface. Requires CAP_NET_RAW (root, in
-// practice) to open the socket at all.
 class CaptureLinux : public ICapture {
     public:
         explicit CaptureLinux(std::string interfaceName);
