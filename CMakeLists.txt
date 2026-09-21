@@ -55,6 +55,12 @@ elseif(UNIX)
     target_compile_definitions(my_sniffer PRIVATE MY_SNIFFER_LINUX=1)
 endif()
 
+include(GNUInstallDirs)
+
+install(TARGETS my_sniffer
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
 include(CTest)
 
 if(BUILD_TESTING)

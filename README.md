@@ -50,15 +50,58 @@ Avec Visual Studio, l'executable sera generalement dans
 
 L'executable se trouve ensuite dans `build/my_sniffer`.
 
+## Privileges requis
+
+La capture reseau brute necessite des privileges eleves, quel que soit l'OS :
+
+- **Linux** : `my_sniffer` ouvre un socket `AF_PACKET`/`SOCK_RAW`, reserve a
+  root ou a un processus disposant de la capability `CAP_NET_RAW`. Deux
+  options :
+  - lancer avec `sudo` (le plus simple, a refaire a chaque execution) ;
+  - donner la capability une fois pour toutes au binaire compile, pour le
+    lancer ensuite sans `sudo` :
+    ```bash
+    sudo setcap cap_net_raw+ep ./build/my_sniffer
+    ./build/my_sniffer eth0
+    ```
+    A refaire apres chaque recompilation (`setcap` s'applique au fichier
+    binaire, pas au projet).
+- **Windows** : le driver **Npcap** doit etre installe sur la machine (pas
+  seulement le SDK utilise pour compiler), et `my_sniffer.exe` doit etre
+  lance depuis un terminal **Administrateur**.
+
+Sans ces privileges, le programme s'arrete immediatement avec un message
+d'erreur explicite (pas de crash) :
+```
+my_sniffer: CaptureLinux: failed to open raw socket on 'eth0' (requires root/CAP_NET_RAW): Operation not permitted
+```
+
 ## Lancer
+
+`my_sniffer` prend le nom de l'interface reseau a ecouter en argument.
+Utilise `ip a` (Linux) ou `ipconfig` (Windows) pour lister tes interfaces.
 
 ```bash
 # Linux
-./build/my_sniffer
+sudo ./build/my_sniffer eth0
 
-# Windows PowerShell avec Visual Studio
-./build/Release/my_sniffer.exe
+# Windows PowerShell avec Visual Studio, terminal Administrateur
+./build/Release/my_sniffer.exe eth0
 ```
+
+Chaque paquet capture est affiche en direct : taille, IP source/destination,
+protocole, ports (si TCP/UDP). Arret avec `Ctrl+C`.
+
+## Installer
+
+```bash
+cmake --install build --prefix /chemin/d/installation
+```
+
+Installe l'executable dans `<prefix>/bin/my_sniffer`. Sans `--prefix`, CMake
+utilise l'emplacement standard du systeme (`/usr/local` sur Linux, "Program
+Files" sur Windows) — necessite alors les droits d'ecriture correspondants
+(souvent `sudo cmake --install build` sur Linux).
 
 ## Tester
 
