@@ -22,6 +22,7 @@ add_executable(my_sniffer
     src/core/packet.cpp
     src/core/packet_builder.cpp
     src/core/event_bus.cpp
+    src/parser/bytes_utils.cpp
 )
 
 target_include_directories(my_sniffer
@@ -55,9 +56,11 @@ if(BUILD_TESTING)
         tests/core/packet_test.cpp
         tests/core/packet_builder_test.cpp
         tests/core/event_bus_test.cpp
+        tests/parser/bytes_utils_test.cpp
         src/core/packet.cpp
         src/core/packet_builder.cpp
         src/core/event_bus.cpp
+        src/parser/bytes_utils.cpp
     )
 
     target_include_directories(my_sniffer_tests
