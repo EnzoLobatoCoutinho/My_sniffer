@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace sniffer::bytes {
@@ -27,6 +28,11 @@ std::string macToString(const std::array<uint8_t, 6>& mac);
 
 // Formats an IPv4 address (as produced by readUint32BE) as "a.b.c.d".
 std::string ipv4ToString(uint32_t ip);
+
+// Parses "a.b.c.d" (each octet 0-255, exactly 4 of them) into the same
+// representation readUint32BE/ipv4ToString use. Returns std::nullopt for
+// anything malformed instead of throwing.
+std::optional<uint32_t> parseIpv4(const std::string& text);
 
 } // namespace sniffer::bytes
 

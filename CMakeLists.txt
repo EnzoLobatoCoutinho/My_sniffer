@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(my_sniffer VERSION 0.1.0 LANGUAGES CXX)
+project(my_sniffer VERSION 0.2.0 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -31,6 +31,8 @@ add_executable(my_sniffer
     src/parser/ipv4_handler.cpp
     src/parser/tcp_handler.cpp
     src/parser/udp_handler.cpp
+    src/filter/filter_leaf.cpp
+    src/filter/filter_composite.cpp
     ${PLATFORM_CAPTURE_SOURCES}
 )
 
@@ -76,6 +78,8 @@ if(BUILD_TESTING)
         tests/parser/ipv4_handler_test.cpp
         tests/parser/tcp_handler_test.cpp
         tests/parser/udp_handler_test.cpp
+        tests/filter/filter_leaf_test.cpp
+        tests/filter/filter_composite_test.cpp
         src/core/packet.cpp
         src/core/packet_builder.cpp
         src/core/event_bus.cpp
@@ -84,6 +88,8 @@ if(BUILD_TESTING)
         src/parser/ipv4_handler.cpp
         src/parser/tcp_handler.cpp
         src/parser/udp_handler.cpp
+        src/filter/filter_leaf.cpp
+        src/filter/filter_composite.cpp
         ${PLATFORM_CAPTURE_TEST_SOURCES}
     )
 
