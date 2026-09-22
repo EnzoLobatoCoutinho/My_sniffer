@@ -4,7 +4,6 @@
         "conan": {}
     },
     "include": [
-        "build/CMakePresets.json",
-        "../../../../../tmp/my_sniffer_npcap_linux/CMakePresets.json"
+        "build/CMakePresets.json"
     ]
 }
