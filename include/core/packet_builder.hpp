@@ -23,6 +23,11 @@ class PacketBuilder {
 
         Packet build() const;
 
+        const std::optional<EthernetHeader>& ethernet() const;
+        const std::optional<Ipv4Header>& ipv4() const;
+        const std::optional<TransportHeader>& transport() const;
+        const std::vector<uint8_t>& payload() const;
+
     private:
         std::chrono::system_clock::time_point timestamp_{};
         std::size_t length_{0};

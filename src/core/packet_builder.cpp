@@ -45,4 +45,20 @@ namespace sniffer {
         return Packet(timestamp_, length_, ethernet_, ipv4_, transport_, payload_);
     }
 
+    const std::optional<EthernetHeader>& PacketBuilder::ethernet() const {
+        return ethernet_;
+    }
+
+    const std::optional<Ipv4Header>& PacketBuilder::ipv4() const {
+        return ipv4_;
+    }
+
+    const std::optional<TransportHeader>& PacketBuilder::transport() const {
+        return transport_;
+    }
+
+    const std::vector<uint8_t>& PacketBuilder::payload() const {
+        return payload_;
+    }
+
 } // namespace sniffer
