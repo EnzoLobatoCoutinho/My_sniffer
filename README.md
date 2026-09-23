@@ -92,7 +92,33 @@ sudo ./build/my_sniffer eth0
 Chaque paquet capture est affiche en direct : taille, IP source/destination,
 protocole, ports (si TCP/UDP). Arret avec `Ctrl+C`.
 
+### Filtrer
+
+Options combinables (ET logique) pour ne visualiser qu'un sous-ensemble du
+trafic :
+
+```bash
+sudo ./build/my_sniffer eth0 --port 443              # uniquement le port 443 (source ou destination)
+sudo ./build/my_sniffer eth0 --ip 10.0.0.1            # uniquement cette IP (source ou destination)
+sudo ./build/my_sniffer eth0 --protocol 6             # uniquement TCP (6) ou UDP (17)
+sudo ./build/my_sniffer eth0 --port 443 --ip 10.0.0.1 # combinaison des deux
+```
+
 ## Installer
+
+### Script automatique
+
+```bash
+# Linux — compile, installe, et donne CAP_NET_RAW au binaire (plus besoin de sudo ensuite)
+./scripts/install.sh [prefix]
+```
+
+```powershell
+# Windows PowerShell — compile et installe, verifie la presence du driver Npcap
+.\scripts\install.ps1 [-Prefix <chemin>]
+```
+
+### Manuellement
 
 ```bash
 cmake --install build --prefix /chemin/d/installation
