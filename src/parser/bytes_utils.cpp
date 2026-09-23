@@ -44,4 +44,46 @@ namespace sniffer::bytes {
         return oss.str();
     }
 
+    std::optional<uint32_t> parseIpv4(const std::string& text) {
+        uint32_t result = 0;
+        std::size_t octetCount = 0;
+        std::size_t digitsInOctet = 0;
+        unsigned int octetValue = 0;
+
+        for (std::size_t i = 0; i <= text.size(); ++i) {
+            const bool atEnd = (i == text.size());
+            const char c = atEnd ? '.' : text[i];
+
+            if (c == '.') {
+                if (digitsInOctet == 0 || octetCount >= 4) {
+                    return std::nullopt;
+                }
+                result = (result << 8) | octetValue;
+                ++octetCount;
+                octetValue = 0;
+                digitsInOctet = 0;
+                if (atEnd) {
+                    break;
+                }
+                continue;
+            }
+
+            if (c < '0' || c > '9' || digitsInOctet >= 3) {
+                return std::nullopt;
+            }
+
+            octetValue = octetValue * 10 + static_cast<unsigned int>(c - '0');
+            if (octetValue > 255) {
+                return std::nullopt;
+            }
+            ++digitsInOctet;
+        }
+
+        if (octetCount != 4) {
+            return std::nullopt;
+        }
+
+        return result;
+    }
+
 } // namespace sniffer::bytes
