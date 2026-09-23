@@ -6,7 +6,6 @@
 */
 
 #include "capture/capture_linux.hpp"
-#include "parser/bytes_utils.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -31,7 +30,9 @@ namespace sniffer {
                 static_cast<uint8_t>((ETH_P_ALL >> 8) & 0xFF),
                 static_cast<uint8_t>(ETH_P_ALL & 0xFF),
             };
-            return bytes::readUint16BE(wire);
+            uint16_t protocol = 0;
+            std::memcpy(&protocol, wire, sizeof(protocol));
+            return protocol;
         }
     } // namespace
 
