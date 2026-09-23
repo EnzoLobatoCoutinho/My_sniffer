@@ -15,8 +15,6 @@
 
 namespace sniffer {
 
-// Matches when every child filter matches (vacuously true with no
-// children, same convention as a logical AND over an empty set).
 class AndFilter : public IFilter {
     public:
         void add(std::shared_ptr<IFilter> filter);
@@ -27,7 +25,6 @@ class AndFilter : public IFilter {
         std::vector<std::shared_ptr<IFilter>> children_;
 };
 
-// Matches when at least one child filter matches (false with no children).
 class OrFilter : public IFilter {
     public:
         void add(std::shared_ptr<IFilter> filter);
@@ -38,7 +35,6 @@ class OrFilter : public IFilter {
         std::vector<std::shared_ptr<IFilter>> children_;
 };
 
-// Matches when the wrapped filter does not.
 class NotFilter : public IFilter {
     public:
         explicit NotFilter(std::shared_ptr<IFilter> filter);
