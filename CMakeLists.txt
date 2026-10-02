@@ -38,6 +38,7 @@ add_executable(my_sniffer
     src/analysis/foreign_ip_analyzer.cpp
     src/analysis/port_protocol_analyzer.cpp
     src/analysis/beacon_analyzer.cpp
+    src/storage/logger.cpp
     ${PLATFORM_CAPTURE_SOURCES}
 )
 
@@ -90,6 +91,7 @@ if(BUILD_TESTING)
         tests/analysis/foreign_ip_analyzer_test.cpp
         tests/analysis/port_protocol_analyzer_test.cpp
         tests/analysis/beacon_analyzer_test.cpp
+        tests/storage/logger_test.cpp
         src/core/packet.cpp
         src/core/packet_builder.cpp
         src/core/event_bus.cpp
@@ -105,6 +107,7 @@ if(BUILD_TESTING)
         src/analysis/foreign_ip_analyzer.cpp
         src/analysis/port_protocol_analyzer.cpp
         src/analysis/beacon_analyzer.cpp
+        src/storage/logger.cpp
         ${PLATFORM_CAPTURE_TEST_SOURCES}
     )
 
