@@ -21,8 +21,16 @@
 #include "parser/udp_handler.hpp"
 #include "storage/logger.hpp"
 
-#ifdef MY_SNIFFER_LINUX
+#if defined(MY_SNIFFER_LINUX)
     #include "capture/capture_linux.hpp"
+    namespace sniffer {
+        using PlatformCapture = CaptureLinux;
+    } // namespace sniffer
+#elif defined(MY_SNIFFER_WINDOWS)
+    #include "capture/capture_windows.hpp"
+    namespace sniffer {
+        using PlatformCapture = CaptureWindows;
+    } // namespace sniffer
 #endif
 
 #include <chrono>
@@ -146,7 +154,7 @@ namespace {
 } // namespace
 
 int main(int argc, char** argv) {
-#ifdef MY_SNIFFER_LINUX
+#if defined(MY_SNIFFER_LINUX) || defined(MY_SNIFFER_WINDOWS)
     const auto options = parseArgs(argc, argv);
     if (!options.has_value()) {
         std::cerr << "usage: " << argv[0]
@@ -198,7 +206,7 @@ int main(int argc, char** argv) {
         }
     });
 
-    sniffer::CaptureLinux capture(options->interface);
+    sniffer::PlatformCapture capture(options->interface);
 
     try {
         capture.start([&](const uint8_t* data, std::size_t len) {
