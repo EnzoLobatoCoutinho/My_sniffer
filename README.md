@@ -104,6 +104,32 @@ sudo ./build/my_sniffer eth0 --protocol 6             # uniquement TCP (6) ou UD
 sudo ./build/my_sniffer eth0 --port 443 --ip 10.0.0.1 # combinaison des deux
 ```
 
+### Analyser
+
+Le moteur d'analyse comportementale (spike de trafic, connexions non
+autorisees vers des IP publiques, protocole inattendu sur un port
+standard, beaconing) tourne en permanence sur tout le trafic capture,
+independamment du filtre d'affichage. Les alertes sortent sur stderr,
+prefixees `[ALERT]`.
+
+```bash
+sudo ./build/my_sniffer eth0 --allow-ip 8.8.8.8 --allow-ip 1.1.1.1
+```
+
+`--allow-ip A.B.C.D` (repetable) pre-autorise une IP publique connue —
+sans ca, **toute** connexion sortante vers une IP publique declenche une
+alerte `ForeignIpAnalyzer`.
+
+### Journaliser
+
+```bash
+sudo ./build/my_sniffer eth0 --log capture.log
+```
+
+`--log PATH` ecrit chaque paquet capture et chaque alerte dans un
+fichier (ajoute a la suite si le fichier existe deja), independamment
+de ce qui s'affiche a l'ecran.
+
 ## Installer
 
 ### Script automatique
