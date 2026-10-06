@@ -19,6 +19,7 @@
 #include "parser/ipv4_handler.hpp"
 #include "parser/tcp_handler.hpp"
 #include "parser/udp_handler.hpp"
+#include "storage/logger.hpp"
 
 #ifdef MY_SNIFFER_LINUX
     #include "capture/capture_linux.hpp"
@@ -54,6 +55,7 @@ namespace {
         std::string interface;
         std::shared_ptr<sniffer::AndFilter> filter = std::make_shared<sniffer::AndFilter>();
         std::unordered_set<uint32_t> allowedForeignIps;
+        std::optional<std::string> logPath;
     };
 
     // Returns std::nullopt (with an explanatory message on stderr) for
@@ -69,8 +71,8 @@ namespace {
 
         for (int i = 2; i < argc; ++i) {
             const std::string arg = argv[i];
-            const bool needsValue =
-                (arg == "--port" || arg == "--ip" || arg == "--protocol" || arg == "--allow-ip");
+            const bool needsValue = (arg == "--port" || arg == "--ip" || arg == "--protocol"
+                                      || arg == "--allow-ip" || arg == "--log");
 
             if (needsValue && i + 1 >= argc) {
                 std::cerr << "my_sniffer: missing value for " << arg << std::endl;
@@ -121,6 +123,8 @@ namespace {
                     return std::nullopt;
                 }
                 options.allowedForeignIps.insert(*ip);
+            } else if (arg == "--log") {
+                options.logPath = argv[++i];
             } else {
                 std::cerr << "my_sniffer: unknown argument '" << arg << "'" << std::endl;
                 return std::nullopt;
@@ -147,8 +151,19 @@ int main(int argc, char** argv) {
     if (!options.has_value()) {
         std::cerr << "usage: " << argv[0]
                    << " <interface> [--port PORT] [--ip A.B.C.D] [--protocol N] [--allow-ip A.B.C.D]"
+                      " [--log PATH]"
                    << std::endl;
         return 1;
+    }
+
+    std::unique_ptr<sniffer::Logger> logger;
+    if (options->logPath.has_value()) {
+        try {
+            logger = std::make_unique<sniffer::Logger>(*options->logPath);
+        } catch (const std::exception& e) {
+            std::cerr << "my_sniffer: " << e.what() << std::endl;
+            return 1;
+        }
     }
 
     auto eth = std::make_shared<sniffer::EthernetHandler>();
@@ -161,17 +176,25 @@ int main(int argc, char** argv) {
 
     sniffer::EventBus bus;
 
+    sniffer::Logger* const loggerPtr = logger.get();
+
     const auto filter = options->filter;
-    bus.subscribe([filter](const sniffer::Packet& pkt) {
+    bus.subscribe([filter, loggerPtr](const sniffer::Packet& pkt) {
         if (filter->matches(pkt)) {
             printPacket(pkt);
+        }
+        if (loggerPtr) {
+            loggerPtr->logPacket(pkt);
         }
     });
 
     auto engine = buildAnalysisEngine(options->allowedForeignIps);
-    bus.subscribe([&engine](const sniffer::Packet& pkt) {
+    bus.subscribe([&engine, loggerPtr](const sniffer::Packet& pkt) {
         for (const auto& alert : engine.onPacket(pkt)) {
             printAlert(alert);
+            if (loggerPtr) {
+                loggerPtr->logAlert(alert);
+            }
         }
     });
 
