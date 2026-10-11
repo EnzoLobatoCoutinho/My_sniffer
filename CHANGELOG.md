@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-11
+
+### Added
+
+- Behavioral analysis engine (Strategy list): `AnalysisEngine` runs every
+  captured packet through independent `IAnalyzer` strategies and
+  aggregates their alerts.
+- `RateSpikeAnalyzer` - flags a source IP sending more packets than a
+  threshold within a sliding time window.
+- `ForeignIpAnalyzer` - flags outbound connections to a public IP not on
+  an allow-list (private/loopback ranges always exempt), alerting once
+  per unique destination. New `--allow-ip` CLI flag to pre-approve known
+  foreign IPs.
+- `PortProtocolAnalyzer` - flags traffic on a well-known port (80, 443)
+  whose payload doesn't match the protocol that port is supposed to
+  carry, a heuristic for tunneling/protocol smuggling.
+- `BeaconAnalyzer` - flags a (src IP, dst IP, dst port) flow whose
+  packets arrive at suspiciously regular intervals, a signature of
+  automated periodic callbacks ("beaconing").
+- `scripts/simulate_beacon.sh` and `scripts/simulate_spike.sh`, UDP-based
+  traffic generators for manually validating the analyzers against real
+  capture.
+
+### Fixed
+
+- The capture callback in `main.cpp` never called
+  `PacketBuilder::setTimestamp()`, leaving every packet at the Unix
+  epoch and silently breaking every time-based analyzer
+  (`RateSpikeAnalyzer`, `BeaconAnalyzer`).
+
 ## [0.2.0] - 2026-09-22
 
 ### Added
@@ -45,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   privileges required for raw capture (`CAP_NET_RAW`/root on Linux,
   Npcap + Administrator on Windows).
 
-[Unreleased]: https://github.com/EnzoLobatoCoutinho/My_sniffer/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/EnzoLobatoCoutinho/My_sniffer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/EnzoLobatoCoutinho/My_sniffer/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/EnzoLobatoCoutinho/My_sniffer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/EnzoLobatoCoutinho/My_sniffer/releases/tag/v0.1.0
