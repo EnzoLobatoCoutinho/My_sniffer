@@ -79,15 +79,25 @@ my_sniffer: CaptureLinux: failed to open raw socket on 'eth0' (requires root/CAP
 ## Lancer
 
 `my_sniffer` prend le nom de l'interface reseau a ecouter en argument.
-Utilise `ip a` (Linux) ou `ipconfig` (Windows) pour lister tes interfaces.
 
 ```bash
-# Linux
+# Linux — utilise `ip a` pour lister tes interfaces (eth0, wlan0...)
 sudo ./build/my_sniffer eth0
 
-# Windows PowerShell avec Visual Studio, terminal Administrateur
-./build/Release/my_sniffer.exe eth0
+# Windows PowerShell, terminal Administrateur
+./build/Release/my_sniffer.exe "\Device\NPF_{GUID-DE-L-ADAPTATEUR}"
 ```
+
+**Important sur Windows** : Npcap identifie les interfaces par un nom de
+peripherique brut (`\Device\NPF_{...}`), pas par le nom convivial affiche
+par `ipconfig`. Pour le trouver :
+
+```powershell
+Get-NetAdapter | Select-Object Name, InterfaceGuid
+```
+
+Repere le `InterfaceGuid` de l'adaptateur voulu (avec les accolades), et
+construis le nom complet : `\Device\NPF_{<InterfaceGuid>}`.
 
 Chaque paquet capture est affiche en direct : taille, IP source/destination,
 protocole, ports (si TCP/UDP). Arret avec `Ctrl+C`.
