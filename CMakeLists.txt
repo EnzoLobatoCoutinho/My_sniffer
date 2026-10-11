@@ -33,6 +33,11 @@ add_executable(my_sniffer
     src/parser/udp_handler.cpp
     src/filter/filter_leaf.cpp
     src/filter/filter_composite.cpp
+    src/analysis/analysis_engine.cpp
+    src/analysis/rate_spike_analyzer.cpp
+    src/analysis/foreign_ip_analyzer.cpp
+    src/analysis/port_protocol_analyzer.cpp
+    src/analysis/beacon_analyzer.cpp
     ${PLATFORM_CAPTURE_SOURCES}
 )
 
@@ -80,6 +85,11 @@ if(BUILD_TESTING)
         tests/parser/udp_handler_test.cpp
         tests/filter/filter_leaf_test.cpp
         tests/filter/filter_composite_test.cpp
+        tests/analysis/analysis_engine_test.cpp
+        tests/analysis/rate_spike_analyzer_test.cpp
+        tests/analysis/foreign_ip_analyzer_test.cpp
+        tests/analysis/port_protocol_analyzer_test.cpp
+        tests/analysis/beacon_analyzer_test.cpp
         src/core/packet.cpp
         src/core/packet_builder.cpp
         src/core/event_bus.cpp
@@ -90,6 +100,11 @@ if(BUILD_TESTING)
         src/parser/udp_handler.cpp
         src/filter/filter_leaf.cpp
         src/filter/filter_composite.cpp
+        src/analysis/analysis_engine.cpp
+        src/analysis/rate_spike_analyzer.cpp
+        src/analysis/foreign_ip_analyzer.cpp
+        src/analysis/port_protocol_analyzer.cpp
+        src/analysis/beacon_analyzer.cpp
         ${PLATFORM_CAPTURE_TEST_SOURCES}
     )
 

@@ -5,6 +5,11 @@
 ** main.cpp
 */
 
+#include "analysis/analysis_engine.hpp"
+#include "analysis/beacon_analyzer.hpp"
+#include "analysis/foreign_ip_analyzer.hpp"
+#include "analysis/port_protocol_analyzer.hpp"
+#include "analysis/rate_spike_analyzer.hpp"
 #include "core/event_bus.hpp"
 #include "core/packet_builder.hpp"
 #include "filter/filter_composite.hpp"
@@ -19,10 +24,12 @@
     #include "capture/capture_linux.hpp"
 #endif
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 namespace {
 
@@ -39,11 +46,19 @@ namespace {
         std::cout << std::endl;
     }
 
+    void printAlert(const sniffer::Alert& alert) {
+        std::cerr << "[ALERT] (" << alert.analyzer << ") " << alert.message << std::endl;
+    }
+
     struct CliOptions {
         std::string interface;
         std::shared_ptr<sniffer::AndFilter> filter = std::make_shared<sniffer::AndFilter>();
+        std::unordered_set<uint32_t> allowedForeignIps;
     };
 
+    // Returns std::nullopt (with an explanatory message on stderr) for
+    // anything malformed, instead of throwing - argument parsing is a
+    // trust boundary, wrong user input must never crash the program.
     std::optional<CliOptions> parseArgs(int argc, char** argv) {
         if (argc < 2) {
             return std::nullopt;
@@ -54,7 +69,8 @@ namespace {
 
         for (int i = 2; i < argc; ++i) {
             const std::string arg = argv[i];
-            const bool needsValue = (arg == "--port" || arg == "--ip" || arg == "--protocol");
+            const bool needsValue =
+                (arg == "--port" || arg == "--ip" || arg == "--protocol" || arg == "--allow-ip");
 
             if (needsValue && i + 1 >= argc) {
                 std::cerr << "my_sniffer: missing value for " << arg << std::endl;
@@ -97,6 +113,14 @@ namespace {
                     return std::nullopt;
                 }
                 options.filter->add(std::make_shared<sniffer::ProtocolFilter>(static_cast<uint8_t>(protocol)));
+            } else if (arg == "--allow-ip") {
+                const std::string value = argv[++i];
+                const auto ip = sniffer::bytes::parseIpv4(value);
+                if (!ip.has_value()) {
+                    std::cerr << "my_sniffer: invalid IP address '" << value << "'" << std::endl;
+                    return std::nullopt;
+                }
+                options.allowedForeignIps.insert(*ip);
             } else {
                 std::cerr << "my_sniffer: unknown argument '" << arg << "'" << std::endl;
                 return std::nullopt;
@@ -106,6 +130,15 @@ namespace {
         return options;
     }
 
+    sniffer::AnalysisEngine buildAnalysisEngine(std::unordered_set<uint32_t> allowedForeignIps) {
+        sniffer::AnalysisEngine engine;
+        engine.addAnalyzer(std::make_unique<sniffer::RateSpikeAnalyzer>(std::chrono::milliseconds(10000), 200));
+        engine.addAnalyzer(std::make_unique<sniffer::ForeignIpAnalyzer>(std::move(allowedForeignIps)));
+        engine.addAnalyzer(std::make_unique<sniffer::PortProtocolAnalyzer>());
+        engine.addAnalyzer(std::make_unique<sniffer::BeaconAnalyzer>(5, 0.5));
+        return engine;
+    }
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -113,7 +146,8 @@ int main(int argc, char** argv) {
     const auto options = parseArgs(argc, argv);
     if (!options.has_value()) {
         std::cerr << "usage: " << argv[0]
-                   << " <interface> [--port PORT] [--ip A.B.C.D] [--protocol N]" << std::endl;
+                   << " <interface> [--port PORT] [--ip A.B.C.D] [--protocol N] [--allow-ip A.B.C.D]"
+                   << std::endl;
         return 1;
     }
 
@@ -126,10 +160,18 @@ int main(int argc, char** argv) {
     tcp->setNext(udp);
 
     sniffer::EventBus bus;
+
     const auto filter = options->filter;
     bus.subscribe([filter](const sniffer::Packet& pkt) {
         if (filter->matches(pkt)) {
             printPacket(pkt);
+        }
+    });
+
+    auto engine = buildAnalysisEngine(options->allowedForeignIps);
+    bus.subscribe([&engine](const sniffer::Packet& pkt) {
+        for (const auto& alert : engine.onPacket(pkt)) {
+            printAlert(alert);
         }
     });
 
@@ -138,6 +180,7 @@ int main(int argc, char** argv) {
     try {
         capture.start([&](const uint8_t* data, std::size_t len) {
             sniffer::PacketBuilder builder;
+            builder.setTimestamp(std::chrono::system_clock::now());
             builder.setLength(len);
             eth->handle(data, len, builder);
             bus.publish(builder.build());
